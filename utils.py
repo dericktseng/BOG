@@ -26,7 +26,7 @@ def pad(string: str, length: int) -> str:
         return string
 
 
-def arr_to_string(arr: list, cutoff: float) -> str:
+def arr_to_string(arr: list, cutoff=float('inf')) -> str:
     """ Converts arr to string table, with cutoff length of characters
     arr is given as an array of arrays of strings, all of arbitrary length.
     expects every string in its list to have the same length
@@ -70,7 +70,7 @@ def arr_to_string(arr: list, cutoff: float) -> str:
     return result.strip()
 
 
-def get_replay_strs(replaydata: dict) -> str:
+def get_replay_strs(replaydata: dict, playername: str) -> str:
     """ Obtains the formatted build order string from replaydata.
     ReplayData is the data obtained from spawningtool parser as documented
     https://github.com/StoicLoofah/spawningtool/wiki/Diving-into-the-Data
@@ -80,17 +80,26 @@ def get_replay_strs(replaydata: dict) -> str:
     game_type = replaydata['game_type']
     globaldata = game_type + ' ' + mapname
 
+    # total string array to pass to arr_to_string()
     stringarray = list()
+
+    # determines whether we want to just obtain the result for a single player
+    playernames = [players[n]['name'].lower() for n in players]
+    filterplayer = playername.lower() in playernames
 
     for p in players:
         player = players[p]
-        if not player['is_human']:
-            continue
-        strlist = list()
-
         name = player['name']
         result = player['result'] or ''
         race = player['pick_race']
+
+        if not player['is_human']:
+            continue
+        if filterplayer and name.lower() != playername.lower():
+            continue
+
+        strlist = list()
+
         header = f'{name} ({race}): {result}'
         headerlen = len(header)
 
@@ -109,5 +118,5 @@ def get_replay_strs(replaydata: dict) -> str:
 
         stringarray.append(strlist)
 
-    totalstr = arr_to_string(stringarray, float('inf'))
+    totalstr = arr_to_string(stringarray)
     return f'{globaldata}\n{totalstr}'

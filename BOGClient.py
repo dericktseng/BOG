@@ -26,6 +26,7 @@ class BOGClient(discord.Client):
 
         for attachment in filter(utils.is_replay, message.attachments):
             try:
+                msg = message.content
                 replaydata = await attachment.read()
                 replayhash = hashlib.md5(replaydata).hexdigest()
                 os.makedirs(const.UPLOAD_DIR, exist_ok=True)
@@ -36,15 +37,15 @@ class BOGClient(discord.Client):
                 f.write(replaydata)
                 f.close()
                 replay = spawningtool.parser.parse_replay(filepath, cache_dir=const.CACHEDIR)
-                total = utils.get_replay_strs(replay)
+                total = utils.get_replay_strs(replay, msg)
 
                 f = io.StringIO(total)
                 result = discord.File(f, filename='buildorder.txt')
                 await message.reply(file=result)
 
-            except (HTTPException, NotFound, Forbidden) as e:
+            except (HTTPException, NotFound, Forbidden) as e: # standard discord errors
                 await message.reply('Unable to access replay')
-            except (ReadError, ReplayFormatError) as e:
+            except (ReadError, ReplayFormatError) as e: # parse errors spawning tool
                 await message.reply('This does not look like a replay')
-            except (KeyError) as e:
+            except (KeyError) as e: # needed if gets an SC2Replay arcade file gets uploaded
                 await message.reply('Unable to parse replay')
