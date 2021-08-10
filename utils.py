@@ -107,7 +107,7 @@ def get_replay_strs(replaydata: dict, playername: str) -> str:
         longestLineLen = max([len(boLine(l)) for l in bo])
         maxlen = max(headerlen, longestLineLen)
 
-        linebreak = '-' * maxlen
+        linebreak = '—' * maxlen
 
         strlist.append(pad(header, maxlen))
         strlist.append(linebreak)
