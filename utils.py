@@ -1,4 +1,4 @@
-from constants import DISCORD_CHAR_LIMIT, SC2EXT
+from constants import SC2EXT
 import pathlib
 from discord.message import Attachment
 
@@ -10,6 +10,7 @@ def is_replay(attachment: Attachment) -> bool:
 
 
 def boLine(buildOrderLine: dict) -> str:
+    """ return string in format '00:24 Zealot' if not worker """
     if buildOrderLine['is_worker']:
         return ''
     return buildOrderLine['time'] + ' ' + buildOrderLine['name']
@@ -25,15 +26,20 @@ def pad(string: str, length: int) -> str:
         return string
 
 
-def arr_to_string(arr: list, cutoff: float) -> str:
+def arr_to_string(arr: list, cutoff=float('inf')) -> str:
     """ Converts arr to string table, with cutoff length of characters
     arr is given as an array of arrays of strings, all of arbitrary length.
     expects every string in its list to have the same length
-    e.g.
+    e.g. arr
     [
         ['line 1', 'line 2'],
         ['line 12', 'line 23', 'line 34']
     ]
+
+    returns:
+        line 1 | line 12
+        line 2 | line 23
+               | line 34
     """
     # removes empty columns from arr
     lst = [col for col in arr if col]
@@ -64,33 +70,44 @@ def arr_to_string(arr: list, cutoff: float) -> str:
     return result.strip()
 
 
-def get_replay_strs(replaydata: dict) -> str:
-    """ Obtains the build order string from replaydata. """
-
+def get_replay_strs(replaydata: dict, playername: str) -> str:
+    """ Obtains the formatted build order string from replaydata.
+    ReplayData is the data obtained from spawningtool parser as documented
+    https://github.com/StoicLoofah/spawningtool/wiki/Diving-into-the-Data
+    """
     mapname = replaydata['map']
     players = replaydata['players']
     game_type = replaydata['game_type']
     globaldata = game_type + ' ' + mapname
 
+    # total string array to pass to arr_to_string()
     stringarray = list()
+
+    # determines whether we want to just obtain the result for a single player
+    playernames = [players[n]['name'].lower() for n in players]
+    filterplayer = playername.lower() in playernames
 
     for p in players:
         player = players[p]
+        name = player['name']
+        result = player['result'] or ''
+        race = player['pick_race']
+
         if not player['is_human']:
             continue
+        if filterplayer and name.lower() != playername.lower():
+            continue
+
         strlist = list()
 
-        name = player['name']
-        result = player['result']
-        race = player['pick_race']
         header = f'{name} ({race}): {result}'
         headerlen = len(header)
 
         bo = player['buildOrder']
-        longestLineLen = len(max([boLine(l) for l in bo if boLine(l)], key=len))
+        longestLineLen = max([len(boLine(l)) for l in bo])
         maxlen = max(headerlen, longestLineLen)
 
-        linebreak = '-' * maxlen
+        linebreak = '—' * maxlen
 
         strlist.append(pad(header, maxlen))
         strlist.append(linebreak)
@@ -101,7 +118,5 @@ def get_replay_strs(replaydata: dict) -> str:
 
         stringarray.append(strlist)
 
-
-    totalstr = arr_to_string(stringarray, float('inf'))
-    totalstr = f'{globaldata}\n{totalstr}'
-    return totalstr
+    totalstr = arr_to_string(stringarray)
+    return f'{globaldata}\n{totalstr}'
