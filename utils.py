@@ -89,7 +89,7 @@ def get_replay_strs(replaydata: dict) -> str:
         strlist = list()
 
         name = player['name']
-        result = player['result']
+        result = player['result'] or ''
         race = player['pick_race']
         header = f'{name} ({race}): {result}'
         headerlen = len(header)
