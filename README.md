@@ -12,6 +12,12 @@ If you want to use the public instance, here's the invite [link](https://discord
 ## Usage
 - Upload an `.SC2Replay` file, and BOG will do the rest
 
+## Dependencies
+- python3
+- [spawningtool](https://github.com/StoicLoofah/spawningtool) (HUUUGE THANKS)
+- discord.py
+- dotenv
+
 ## Donation
 If this project has helped you in any way, or you are feeling a bit loaded in cash, please consider donating to support my wallet-draining education as well as hosting this bot.
 
