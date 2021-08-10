@@ -43,6 +43,8 @@ class BOGClient(discord.Client):
                 await message.reply(file=result)
 
             except (HTTPException, NotFound, Forbidden) as e:
-                await message.reply(str(e))
+                await message.reply('Unable to access replay')
             except (ReadError, ReplayFormatError) as e:
-                await message.reply(str(e))
+                await message.reply('This does not look like a replay')
+            except (KeyError) as e:
+                await message.reply('Unable to parse replay')
