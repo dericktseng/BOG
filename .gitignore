@@ -1,0 +1,5 @@
+.venv
+.vim
+__pycache__
+.env
+UPLOAD_DIR
