@@ -11,6 +11,7 @@ If you want to use the public instance, here's the invite [link](https://discord
 
 ## Usage
 - Upload an `.SC2Replay` file, and BOG will do the rest
+- you can specify a player's name in the message to obtain only the specified player's build order column (Capitalization doesn't matter)
 
 ## Dependencies
 - python3

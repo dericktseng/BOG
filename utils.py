@@ -9,12 +9,14 @@ def is_replay(attachment: Attachment) -> bool:
     return file_ext == SC2EXT and attachment.content_type == None
 
 
-def boLine(buildOrderLine: dict) -> str:
-    """ return string in format '00:24 Zealot' if not worker """
-    if buildOrderLine['is_worker']:
-        return ''
-    return buildOrderLine['time'] + ' ' + buildOrderLine['name']
-
+def boLine(timestamp: str, buildOrderLine: dict) -> str:
+    """ return string in format '00:24 Zealot(2) Probe(3)' """
+    buildOrderstr = ''
+    for line in buildOrderLine:
+        count = buildOrderLine[line]
+        buildOrderstr += f'{line}({count})' if count != 1 else line
+        buildOrderstr += ' '
+    return timestamp + ' ' + buildOrderstr.strip()
 
 
 def pad(string: str, length: int) -> str:
@@ -70,6 +72,47 @@ def arr_to_string(arr: list, cutoff=float('inf')) -> str:
     return result.strip()
 
 
+def generate_build_order_list(buildorder: dict) -> list:
+    """ from spawningtool player's buildorder dict
+    obtain list where each string represents a line in the build order
+    """
+
+    strlist = list()
+    timestampbuilditem = [None, dict()] # [timestamp, {"probe": 3, "zealot": 2}]
+
+    # ignore workers from the build order
+    for builditem in filter(lambda e: not e['is_worker'], buildorder):
+        # we need to initialize it
+        buildname = builditem['name']
+        buildtime = builditem['time']
+        if not timestampbuilditem[0]:
+            timestampbuilditem[0] = buildtime
+        curritemtime = timestampbuilditem[0]
+
+        if curritemtime != buildtime:
+            # add string version of timestampbuilditem to strlist
+            timestamp, buildline = timestampbuilditem
+            strlist.append(boLine(timestamp, buildline))
+
+            # clears timestampbuilditem for new timestamp
+            timestampbuilditem[0] = buildtime
+            timestampbuilditem[1] = dict()
+
+        # adds current build item to the current time line
+        buildline = timestampbuilditem[1]
+        if buildname in buildline:
+            buildline[buildname] += 1
+        else:
+            buildline[buildname] = 1
+
+    # append final timestampbuilditem to strlist
+    timestamp, buildline = timestampbuilditem
+    if timestamp:
+        strlist.append(boLine(timestamp, buildline))
+
+    return strlist
+
+
 def get_replay_strs(replaydata: dict, playername: str) -> str:
     """ Obtains the formatted build order string from replaydata.
     ReplayData is the data obtained from spawningtool parser as documented
@@ -93,30 +136,27 @@ def get_replay_strs(replaydata: dict, playername: str) -> str:
         result = player['result'] or ''
         race = player['pick_race']
 
+        # ignore bot players and those that do not pass the filter
         if not player['is_human']:
             continue
         if filterplayer and name.lower() != playername.lower():
             continue
 
-        strlist = list()
+        buildorder = player['buildOrder']
+        bostrlist = generate_build_order_list(buildorder)
 
         header = f'{name} ({race}): {result}'
+        longestLineLen = max([len(line) for line in bostrlist])
         headerlen = len(header)
-
-        bo = player['buildOrder']
-        longestLineLen = max([len(boLine(l)) for l in bo])
         maxlen = max(headerlen, longestLineLen)
-
         linebreak = '—' * maxlen
+        header = pad(header, maxlen)
 
-        strlist.append(pad(header, maxlen))
-        strlist.append(linebreak)
+        bostrlist = [pad(line, maxlen) for line in bostrlist]
+        bostrlist.insert(0, header)
+        bostrlist.insert(1, linebreak)
 
-        # obtains all elements that are not workers
-        for elem in filter(lambda e: not e['is_worker'], bo):
-            strlist.append(pad(boLine(elem), maxlen))
-
-        stringarray.append(strlist)
+        stringarray.append(bostrlist)
 
     totalstr = arr_to_string(stringarray)
     return f'{globaldata}\n{totalstr}'
