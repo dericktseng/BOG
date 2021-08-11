@@ -45,6 +45,11 @@ def arr_to_string(arr: list, cutoff=float('inf')) -> str:
     """
     # removes empty columns from arr
     lst = [col for col in arr if col]
+
+    # catches the error if lst is empty, otherwise max complains
+    if not lst:
+        return ''
+
     max_lines = max([len(col) for col in lst])
     paddings = [len(col[0]) for col in lst]
 

@@ -47,5 +47,5 @@ class BOGClient(discord.Client):
                 await message.reply('Unable to access replay')
             except (ReadError, ReplayFormatError) as e: # parse errors spawning tool
                 await message.reply('This does not look like a replay')
-            except (KeyError) as e: # needed if gets an SC2Replay arcade file gets uploaded
+            except: # needed if we get an unparsable replay
                 await message.reply('Unable to parse replay')
