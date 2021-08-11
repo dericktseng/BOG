@@ -1,6 +1,9 @@
 # BOG
 A build order generator discord bot.
 
+## Screenshots
+![example](./screenshots/screenshot1.png)
+
 ## Invite Link
 If you want to use the public instance, here's the invite [link](https://discord.com/api/oauth2/authorize?client_id=874351928803483749&permissions=116736&scope=bot).
 
