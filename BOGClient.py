@@ -49,3 +49,4 @@ class BOGClient(discord.Client):
                 await message.reply('This does not look like a replay')
             except: # needed if we get an unparsable replay
                 await message.reply('Unable to parse replay')
+                # TODO: may want to save the breaking replay for debugging purposes later on.
