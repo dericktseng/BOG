@@ -11,12 +11,13 @@ def is_replay(attachment: Attachment) -> bool:
 
 def boLine(timestamp: str, buildOrderLine: dict) -> str:
     """ return string in format '00:24 Zealot(2) Probe(3)' """
-    buildOrderstr = ''
+    buildOrderstr = timestamp + ' '
     for line in buildOrderLine:
         count = buildOrderLine[line]
         buildOrderstr += f'{line}({count})' if count != 1 else line
-        buildOrderstr += ' '
-    return timestamp + ' ' + buildOrderstr.strip()
+        buildOrderstr += ', '
+    # removes the last two characters (comma and space)
+    return buildOrderstr[:-2]
 
 
 def pad(string: str, length: int) -> str:
@@ -45,6 +46,11 @@ def arr_to_string(arr: list, cutoff=float('inf')) -> str:
     """
     # removes empty columns from arr
     lst = [col for col in arr if col]
+
+    # catches the error if lst is empty, otherwise max complains
+    if not lst:
+        return ''
+
     max_lines = max([len(col) for col in lst])
     paddings = [len(col[0]) for col in lst]
 
