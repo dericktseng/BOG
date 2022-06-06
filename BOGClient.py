@@ -43,10 +43,10 @@ class BOGClient(discord.Client):
                 result = discord.File(f, filename='buildorder.txt')
                 await message.reply(file=result)
 
-            except (HTTPException, NotFound, Forbidden) as e: # standard discord errors
+            except (HTTPException, NotFound, Forbidden) as _: # standard discord errors
                 await message.reply('Unable to access replay')
-            except (ReadError, ReplayFormatError) as e: # parse errors spawning tool
+            except (ReadError, ReplayFormatError) as _: # parse errors spawning tool
                 await message.reply('This does not look like a replay')
-            except: # needed if we get an unparsable replay
-                await message.reply('Unable to parse replay')
+            except Exception as e: # needed if we get an unparsable replay
+                await message.reply('Unable to parse replay.\n```{}```'.format(e))
                 # TODO: may want to save the breaking replay for debugging purposes later on.

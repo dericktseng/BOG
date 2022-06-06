@@ -1,3 +1,4 @@
 discord.py
-spawningtool
 python-dotenv
+git+https://github.com/StoicLoofah/spawningtool.git#egg=spawningtool
+git+https://github.com/ggtracker/sc2reader#egg=sc2reader
