@@ -1,7 +1,7 @@
 import discord
 import os
 import hashlib
-from discord import Message
+from discord import Message, Intents
 from discord.errors import Forbidden, HTTPException, NotFound
 from spawningtool.exception import ReadError, ReplayFormatError
 import spawningtool.parser
@@ -11,6 +11,9 @@ import io
 
 class BOGClient(discord.Client):
     """ Represents the Discord Bot Client """
+    def __init__(self):
+        super().__init__(intents=Intents(message_content=True, messages=True))
+
 
     async def on_ready(self):
         print("BOG is now running.")
@@ -33,14 +36,15 @@ class BOGClient(discord.Client):
 
                 basename = replayhash + const.SC2EXT
                 filepath = os.path.join(const.UPLOAD_DIR, basename)
+
                 f = open(filepath, 'wb')
                 f.write(replaydata)
                 f.close()
                 replay = spawningtool.parser.parse_replay(filepath, cache_dir=const.CACHEDIR)
                 total = utils.get_replay_strs(replay, msg)
+                replay_str_output = io.BytesIO(bytes(total, 'utf-8'))
 
-                f = io.StringIO(total)
-                result = discord.File(f, filename='buildorder.txt')
+                result = discord.File(replay_str_output, filename='buildorder.txt')
                 await message.reply(file=result)
 
             except (HTTPException, NotFound, Forbidden) as _: # standard discord errors
