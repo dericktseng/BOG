@@ -1,0 +1,12 @@
+[Unit]
+Description=BOG discord bot
+After=network.target
+
+[Service]
+WorkingDirectory={{ WORKING_DIR }}
+ExecStart={{ WORKING_DIR }}/.venv/bin/python {{ WORKING_DIR }}/main.py
+Restart=on-failure
+EnvironmentFile={{ WORKING_DIR }}/.env
+
+[Install]
+WantedBy=multi-user.target
